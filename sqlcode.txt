@@ -1,0 +1,33 @@
+-- Create the telecom database and switch to it
+CREATE DATABASE telecom;
+USE telecom;
+
+-- Create the plans table to store plan information
+CREATE TABLE plans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL
+);
+
+-- Create the users table to store user details
+-- The plan_id column is a foreign key that references the plans table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    plan_id INT,
+    FOREIGN KEY (plan_id) REFERENCES plans(id)
+);
+
+CREATE USER 'chatbot_user'@'localhost' IDENTIFIED BY 'your_secure_password';
+GRANT ALL PRIVILEGES ON telecom.* TO 'chatbot_user'@'localhost';
+FLUSH PRIVILEGES;
+
+INSERT INTO plans (name, price) VALUES ('Basic Plan', 19.99);
+INSERT INTO plans (name, price) VALUES ('Standard Plan', 29.99);
+INSERT INTO plans (name, price) VALUES ('Premium Plan', 39.99);
+INSERT INTO plans (name, price) VALUES ('Unlimited Plan', 49.99);
+
+select * from users;
+
+
