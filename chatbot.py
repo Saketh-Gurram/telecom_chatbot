@@ -4,7 +4,7 @@ import pyttsx3
 from groq import Groq
 
 # Hardcoded GroqCloud API key (use environment variables in production)
-GROQCLOUD_API_KEY = "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"
+GROQCLOUD_API_KEY = ""
 
 # Initialize GroqCloud client
 client = Groq(api_key=GROQCLOUD_API_KEY)
