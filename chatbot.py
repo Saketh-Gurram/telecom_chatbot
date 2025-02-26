@@ -3,8 +3,8 @@ import speech_recognition as sr
 import pyttsx3
 from groq import Groq
 
-# Hardcoded GroqCloud API key (use environment variables in production)
-GROQCLOUD_API_KEY = ""
+# Hardcoded GroqCloud API key (use environment variables for production)
+GROQCLOUD_API_KEY = "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"
 
 # Initialize GroqCloud client
 client = Groq(api_key=GROQCLOUD_API_KEY)
@@ -12,8 +12,8 @@ client = Groq(api_key=GROQCLOUD_API_KEY)
 # Initialize text-to-speech engine
 tts_engine = pyttsx3.init()
 
-# Global variable for mode selection
-voice_mode = False  # Default is text mode
+# Global variable for mode selection (voice or text)
+voice_mode = False  # Default: text mode
 
 def speak(text):
     """Output text via TTS if voice mode is enabled, otherwise print it."""
@@ -52,8 +52,8 @@ def connect_to_db():
     try:
         return mysql.connector.connect(
             host="localhost",
-            user="root",       
-            password="saketh",  
+            user="root",
+            password="saketh",
             database="telecom"
         )
     except mysql.connector.Error as err:
@@ -76,22 +76,21 @@ def get_user_details():
     name = get_input("What is your name?")
     if not name:
         return None, None, None
-
     phone = get_input("What is your phone number?")
     if not phone:
         return None, None, None
-
     plan_id = get_input("Which plan ID do you want to choose?")
     if not plan_id or not plan_id.isdigit():
         speak("Invalid plan ID. Please try again later.")
         return None, None, None
-
     return name, phone, int(plan_id)
 
 def save_user_details(cursor, db, name, phone, plan_id):
-    """Save the user's details into the database after checking SIM card limit."""
+    """
+    Save the user's details into the database.
+    Checks if the user (identified by name and phone) already has 2 SIM cards.
+    """
     try:
-        # Check if the user already has 2 SIM cards (using name and phone as identifiers)
         cursor.execute("SELECT COUNT(*) FROM users WHERE name = %s AND phone = %s", (name, phone))
         sim_count = cursor.fetchone()[0]
         if sim_count >= 2:
@@ -102,10 +101,8 @@ def save_user_details(cursor, db, name, phone, plan_id):
         return
 
     try:
-        cursor.execute(
-            "INSERT INTO users (name, phone, plan_id) VALUES (%s, %s, %s)",
-            (name, phone, plan_id)
-        )
+        cursor.execute("INSERT INTO users (name, phone, plan_id) VALUES (%s, %s, %s)",
+                       (name, phone, plan_id))
         db.commit()
         speak("Your details have been saved successfully!")
     except mysql.connector.Error as err:
@@ -119,7 +116,7 @@ def get_usage_details():
     return data_usage, call_minutes, texts
 
 def get_plan_recommendation(usage_details):
-    """Request a plan recommendation from GroqCloud based on usage."""
+    """Request a plan recommendation from GroqCloud based on usage details."""
     message = (
         f"My monthly usage is {usage_details[0]}GB of data, "
         f"{usage_details[1]} call minutes, and {usage_details[2]} texts. "
@@ -136,10 +133,9 @@ def get_plan_recommendation(usage_details):
     return recommendation
 
 def main():
-    """Main function to choose mode and run the chatbot."""
+    """Main function for the user chatbot."""
     global voice_mode
-    
-    # Mode selection at startup
+
     print("Welcome! Do you want to use voice mode or text mode?")
     mode = input("Choose mode (voice/text): ").strip().lower()
     if mode == "voice":
@@ -148,19 +144,17 @@ def main():
     else:
         voice_mode = False
         print("Text mode activated!")
-    
-    # Connect to database
+
     db = connect_to_db()
     cursor = db.cursor()
 
-    # Chatbot main loop
     while True:
         if voice_mode:
             speak("Say: 'show plans', 'enter details', 'get recommendation', or 'exit'.")
             command = listen()
         else:
             command = input("Enter command (show plans, enter details, get recommendation, exit): ").strip().lower()
-        
+
         if not command:
             continue
 
